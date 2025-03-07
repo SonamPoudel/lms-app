@@ -34,7 +34,7 @@ const registerSchema = object({
 export default function Register() {
   // useState is a react hook to store state values
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();  // initialize navigate hook
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,32 +49,32 @@ export default function Register() {
         abortEarly: false,
       });
       registerUser(validFormData);
+
+      // TODO: API call to register user
     } catch (error: any) {
       setError(error.errors.join("\n"));
       return;
     }
   };
 
-  // always wrap API calls in try-catch block
   const registerUser = async (formData: FormData) => {
+    console.log(formData);
     try {
       const response = await fetch("http://localhost:3000/auth/register", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(formData),
       });
       const data = await response.json();
       localStorage.setItem("token", data.token);
+      console.log(data);
       navigate("/");
     } catch (error) {
       console.log("error", error);
     }
   };
-
-  // Request method
-  // - GET - default method
-  // - POST - create (has request body)
-  // - PATCH - update (has request body)
-  // - DELETE
 
   return (
     <div className="flex flex-col w-90 bg-white p-4 rounded shadow-md">

@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import CustomInput from "../components/CustomInput";
 import { NavLink, useNavigate } from "react-router";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
   // useState is a react hook to store state values
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();  // initialize navigate hook
+  const navigate = useNavigate(); // initialize navigate hook
+  const { handleLogin } = useContext(AuthContext); //initialize Authcontext
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,27 +22,30 @@ export default function Login() {
     try {
       const response = await fetch("http://localhost:3000/auth/login", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(formData),
       });
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message);
       }
-      localStorage.setItem("token", data.token);
+      handleLogin(data.token);
       console.log(data);
       navigate("/");
     } catch (error) {
       console.log("error", error);
       setError("Invalid username or password");
     }
-  }
+  };
 
   return (
     <div className="flex flex-col w-90 bg-white p-4 rounded shadow-md">
       <h1 className="text-lg font-bold text-center">Login</h1>
       <form className="flex flex-col p-4 w-full gap-2" onSubmit={handleSubmit}>
-        <CustomInput label="Username" />
-        <CustomInput label="Password" type="password" />
+        <CustomInput label="Username" name={""} />
+        <CustomInput label="Password" type="password" name={""} />
         <p className="text-red-400">{error}</p>
         <button type="submit" className="bg-black text-white mt-4 rounded py-1">
           Submit

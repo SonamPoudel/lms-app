@@ -4,25 +4,20 @@ import { useNavigate } from "react-router";
 
 const token = localStorage.getItem("token");
 
-interface Book {
+interface Member {
   id: number;
-  title: string;
-  author: string;
-  publisher: string;
-  published_date: Date;
-  isbn: number;
-  category: string;
-  available_copies: number;
-  total_copies: number;
+  name: string;
+  phone: number;
+  address: string;
+  user_id: number;
 }
-
-export default function Books() {
-  const [bookData, setBookData] = useState<Book[]>([]);
+export default function Member() {
+  const [memberData, setMemberData] = useState<Member[]>([]);
   const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
-      const response = await fetch("http://localhost:3000/books", {
+      const response = await fetch("http://localhost:3000/members", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -30,95 +25,76 @@ export default function Books() {
         },
       });
       const data = await response.json();
-      //sorting books by id in ascending order
-      const sortedData = data.sort((a: Book, b: Book) => a.id - b.id);
-      setBookData(sortedData);
+      const sortedData = data.sort((a: Member, b: Member) => a.id - b.id);
+      setMemberData(sortedData);
     } catch (error) {
-      console.error("Error fetching books:", error);
+      console.error("Error fetching members:", error);
     }
   };
-
   useEffect(() => {
     fetchData();
   }, []);
-
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this book?")) return;
-
+    if (!confirm("Are you sure you want to delete this member?")) return;
     try {
-      await fetch(`http://localhost:3000/books/${id}`, {
+      await fetch(`http://localhost:3000/members/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-
-      setBookData((prev) => prev.filter((book) => book.id !== id));
+      setMemberData((prev) => prev.filter((member) => member.id !== id));
     } catch (error) {
-      console.error("Error deleting book:", error);
+      console.error("Error deleting member:", error);
     }
   };
-
   const handleEdit = (id: number) => {
-    navigate(`/books/edit/${id}`);
+    navigate(`/members/edit/${id}`);
   };
-
   return (
     <div className="w-full h-full p-6">
-      <h1 className="text-3xl font-semibold mb-4">Books</h1>
-
+      <h1 className="text-3xl font-semibold mb-4">Members</h1>
       <button
-        onClick={() => navigate("/books/add")}
+        onClick={() => navigate("/members/add")}
         className="bg-blue-400 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200"
       >
-        + Add Book
+        + Add Member
       </button>
-
       <div className="w-full overflow-auto mt-6">
         <table className="w-full bg-white border border-black-500 rounded-lg shadow-md">
           <thead className="bg-green-200 border-b">
             <tr className="text-left text-gray-600">
               <th className="p-3">ID</th>
-              <th className="p-3">Title</th>
-              <th className="p-3">Author</th>
-              <th className="p-3">Publisher</th>
-              <th className="p-3">Published Date</th>
-              <th className="p-3">ISBN</th>
-              <th className="p-3">Category</th>
-              <th className="p-3">Available Copies</th>
-              <th className="p-3">Total Copies</th>
+              <th className="p-3">Name</th>
+              <th className="p-3">Phone</th>
+              <th className="p-3">Address</th>
+              <th className="p-3">User_id</th>
               <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {bookData.length > 0 ? (
-              bookData.map((book) => (
+            {memberData.length > 0 ? (
+              memberData.map((member) => (
                 <tr
-                  key={book.id}
+                  key={member.id}
                   className="border-b hover:bg-gray-50 transition duration-150"
                 >
-                  <td className="p-3">{book.id}</td>
-                  <td className="p-3">{book.title}</td>
-                  <td className="p-3">{book.author}</td>
-                  <td className="p-3">{book.publisher}</td>
-                  <td className="p-3">
-                    {new Date(book.published_date).toLocaleDateString()}
-                  </td>
-                  <td className="p-3">{book.isbn}</td>
-                  <td className="p-3">{book.category}</td>
-                  <td className="p-3">{book.available_copies}</td>
-                  <td className="p-3">{book.total_copies}</td>
+                  <td className="p-3">{member.id}</td>
+                  <td className="p-3">{member.name}</td>
+                  <td className="p-3">{member.phone}</td>
+                  <td className="p-3">{member.address}</td>
+                  <td className="p-3">{member.user_id}</td>
                   <td className="p-3 text-center">
                     <div className="flex gap-3 justify-center">
                       <button
-                        onClick={() => handleEdit(book.id)}
+                        onClick={() => handleEdit(member.id)}
                         className="p-2 bg-green-400 text-white rounded-md hover:bg-green-600 transition duration-150"
                       >
                         <PencilIcon size={18} />
                       </button>
                       <button
-                        onClick={() => handleDelete(book.id)}
+                        onClick={() => handleDelete(member.id)}
                         className="p-2 bg-red-400 text-white rounded-md hover:bg-red-600 transition duration-150"
                       >
                         <Trash2Icon size={18} />
@@ -130,7 +106,7 @@ export default function Books() {
             ) : (
               <tr>
                 <td colSpan={10} className="p-4 text-center text-gray-500">
-                  No books available.
+                  No members detected.
                 </td>
               </tr>
             )}
