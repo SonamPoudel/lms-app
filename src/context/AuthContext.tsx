@@ -1,32 +1,50 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, ReactNode } from "react";
+
 interface AuthContextType {
   token: string | null;
-  setToken: (token: string) => void;
+  setToken: (token: string | null) => void;
   handleLogout: () => void;
   handleLogin: (token: string) => void;
 }
-//create a context with default values
+
+// Create a context with default values
 const AuthContext = createContext<AuthContextType>({
   token: null,
-  setToken: () => {}, //empty function
+  setToken: () => {}, // Empty function
   handleLogout: () => {},
   handleLogin: () => {},
 });
-//children is a special prop that holds all the children(consumer) components
-const AuthProvider: any = ({ children }: any) => {
-  const [token, setToken] = useState<string | null>("tokennn");
+
+// Define provider props type
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+const AuthProvider = ({ children }: AuthProviderProps) => {
+  // Initialize token from localStorage
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem("token")
+  );
+
+  useEffect(() => {
+    // Sync token with localStorage whenever it changes
+    if (token) {
+      localStorage.setItem("token", token);
+    } else {
+      localStorage.removeItem("token");
+    }
+  }, [token]);
 
   const handleLogin = (token: string) => {
-    localStorage.setItem("token", token);
+    setToken(token); // Update state
   };
 
   const handleLogout = () => {
-    setToken(null);
-    localStorage.removeItem("token");
+    setToken(null); // Clear token
   };
 
   return (
-    //provide the context to all the children
+    // Provide the context to all the children
     <AuthContext.Provider
       value={{ token, setToken, handleLogout, handleLogin }}
     >
@@ -34,5 +52,6 @@ const AuthProvider: any = ({ children }: any) => {
     </AuthContext.Provider>
   );
 };
-//export the context and provider
+
+// Export the context and provider
 export { AuthContext, AuthProvider };

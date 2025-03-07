@@ -70,7 +70,7 @@ export default function Register() {
       const data = await response.json();
       localStorage.setItem("token", data.token);
       console.log(data);
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       console.log("error", error);
     }

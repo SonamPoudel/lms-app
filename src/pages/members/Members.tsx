@@ -1,21 +1,27 @@
 import { PencilIcon, Trash2Icon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-
-const token = localStorage.getItem("token");
+import { AuthContext } from "../../context/AuthContext"; // Update with actual path
 
 interface Member {
   id: number;
   name: string;
-  phone: number;
+  phone: string;
   address: string;
   user_id: number;
 }
+
 export default function Member() {
+  const { token } = useContext(AuthContext); // Get token from AuthContext
   const [memberData, setMemberData] = useState<Member[]>([]);
   const navigate = useNavigate();
 
   const fetchData = async () => {
+    if (!token) {
+      console.error("Token not found. Please log in.");
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:3000/members", {
         method: "GET",
@@ -24,34 +30,60 @@ export default function Member() {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      console.log("Response Status:", response.status); // Debugging
+      if (!response.ok) {
+        throw new Error(`Failed to fetch: ${response.statusText}`);
+      }
+
       const data = await response.json();
-      const sortedData = data.sort((a: Member, b: Member) => a.id - b.id);
-      setMemberData(sortedData);
+      console.log("Fetched Data:", data); // Debugging
+
+      if (Array.isArray(data)) {
+        setMemberData(data.sort((a: Member, b: Member) => a.id - b.id));
+      } else {
+        console.error("Invalid data format:", data);
+      }
     } catch (error) {
       console.error("Error fetching members:", error);
     }
   };
+
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [token]); // Re-fetch when token updates
+
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this member?")) return;
+
+    if (!token) {
+      console.error("Token not found. Please log in.");
+      return;
+    }
+
     try {
-      await fetch(`http://localhost:3000/members/${id}`, {
+      const response = await fetch(`http://localhost:3000/members/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete: ${response.statusText}`);
+      }
+
       setMemberData((prev) => prev.filter((member) => member.id !== id));
     } catch (error) {
       console.error("Error deleting member:", error);
     }
   };
+
   const handleEdit = (id: number) => {
     navigate(`/members/edit/${id}`);
   };
+
   return (
     <div className="w-full h-full p-6">
       <h1 className="text-3xl font-semibold mb-4">Members</h1>
@@ -69,7 +101,7 @@ export default function Member() {
               <th className="p-3">Name</th>
               <th className="p-3">Phone</th>
               <th className="p-3">Address</th>
-              <th className="p-3">User_id</th>
+              <th className="p-3">User ID</th>
               <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
@@ -105,7 +137,7 @@ export default function Member() {
               ))
             ) : (
               <tr>
-                <td colSpan={10} className="p-4 text-center text-gray-500">
+                <td colSpan={6} className="p-4 text-center text-gray-500">
                   No members detected.
                 </td>
               </tr>
