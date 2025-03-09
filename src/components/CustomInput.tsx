@@ -34,7 +34,7 @@ export default function CustomInput({
   }, [value]);
 
   return (
-    <div className="grid">
+    <div className="w-full">
       <label>{label}</label>
       <input
         className="border border-gray-300 rounded w-full px-2 py-1 disabled:bg-gray-200"
@@ -43,7 +43,7 @@ export default function CustomInput({
         name={name || label.toLowerCase()}
         value={input}
         onChange={(e) => {
-          onChange && onChange(e);
+          onChange?.(e);
           setInput(e.target.value);
         }}
         disabled={disabled} // Controls whether the field is editable

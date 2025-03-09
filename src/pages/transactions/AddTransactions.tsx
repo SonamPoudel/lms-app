@@ -1,11 +1,26 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useMemo } from "react";
 import CustomInput from "../../components/CustomInput";
 import { useNavigate } from "react-router";
 import { AuthContext } from "../../context/AuthContext"; // Update with actual path
+import { BooksContext } from "../../context/BooksContext";
 
 export default function AddTransaction() {
+  const [transactionType, setTransactionType] = useState("borrow");
+  const [bookId, setBookId] = useState<number | null>(null);
   const { token } = useContext(AuthContext); // Get token from AuthContext
   const navigate = useNavigate();
+  const { bookData } = useContext(BooksContext);
+
+  console.log(bookData);
+
+  const bookOptions = useMemo(
+    () =>
+      bookData.map((book) => ({
+        label: book.title,
+        value: book.id,
+      })),
+    [bookData]
+  );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,7 +38,14 @@ export default function AddTransaction() {
       return;
     }
 
-    const transactionDataReq = { deadline, member_id, book_id, transaction_type };
+    console.log({ transactionType, bookId })
+
+    const transactionDataReq = {
+      deadline,
+      member_id,
+      book_id: bookId,
+      transaction_type: transactionType,
+    };
 
     try {
       const response = await fetch("http://localhost:3000/transactions", {
@@ -51,18 +73,58 @@ export default function AddTransaction() {
   };
 
   return (
-    <div className="flex flex-col items-start gap-4">
+    <div className="flex flex-col items-start gap-4 w-full">
       <h1 className="text-lg font-bold">Add Transaction</h1>
       <form
         onSubmit={handleSubmit}
         className="flex flex-col space-y-4 bg-white p-8 rounded-lg shadow-md w-full"
       >
-        <div className="flex flex-row space-x-4">
-          <div className="flex flex-col space-y-2 w-1/2">
-            <CustomInput label="Deadline" type="text" name="deadline" required />
-            <CustomInput label="Member_id" type="number" name="member_id" required />
-            <CustomInput label="Transaction_type" type="text" name="transaction_type" required />
-            <CustomInput label="Book_id" type="number" name="book_id" required/>
+        <div className="flex flex-col gap-4 w-full">
+          <div className="flex gap-4 w-full">
+            <div className="flex flex-col w-full">
+              <label htmlFor="book">Book</label>
+              <select
+                name="book"
+                className="w-full border h-8 rounded border-gray-300 px-2"
+                defaultValue={""}
+                onChange={(e) => setBookId(parseInt(e.target.value, 10))}
+              >
+                <option>Select Book</option>
+                {bookOptions.map((book) => (
+                  <option key={book.value} value={book.value}>
+                    {book.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <CustomInput
+              label="Member_id"
+              type="number"
+              name="member_id"
+              required
+            />
+          </div>
+          <div className="flex gap-4 w-full">
+            {/* select input */}
+            <div className="flex flex-col w-full">
+              <label htmlFor="transaction_type">Transaction Type</label>
+              <select
+                name="transaction_type"
+                className="w-full border h-8 rounded border-gray-300 px-2"
+                defaultValue={"borrow"}
+                onChange={(e) => setTransactionType(e.target.value)}
+              >
+                <option value="borrow">Borrow</option>
+                <option value="return">Return</option>
+              </select>
+            </div>
+
+            <CustomInput
+              label="Deadline"
+              type="date"
+              name="deadline"
+              required
+            />
           </div>
         </div>
         <div className="flex justify-end">

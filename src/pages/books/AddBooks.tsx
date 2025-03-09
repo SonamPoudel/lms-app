@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import CustomInput from "../../components/CustomInput";
 import { useNavigate } from "react-router";
+import { BooksContext } from "../../context/BooksContext";
 // import axios from "axios";
 
 export default function AddBooks() {
   const token = localStorage.getItem("token");
+  const { setBookData } = useContext(BooksContext);
 
   const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -30,7 +32,11 @@ export default function AddBooks() {
         body: JSON.stringify(bookDataReq),
       });
 
+      const responseJson = await response.json();
+
       if (response.status === 201) {
+        // @ts-ignore
+        setBookData((prev) => [...prev, responseJson])
         alert("Book added successfully!");
         navigate("/books");
       }

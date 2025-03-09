@@ -1,10 +1,11 @@
 import { PencilIcon, Trash2Icon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useContext } from "react";
 import { useNavigate } from "react-router";
+import { BooksContext } from "../../context/BooksContext";
 
 const token = localStorage.getItem("token");
 
-interface Book {
+export interface Book {
   id: number;
   title: string;
   author: string;
@@ -17,30 +18,8 @@ interface Book {
 }
 
 export default function Books() {
-  const [bookData, setBookData] = useState<Book[]>([]);
   const navigate = useNavigate();
-
-  const fetchData = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/books", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      //sorting books by id in ascending order
-      const sortedData = data.sort((a: Book, b: Book) => a.id - b.id);
-      setBookData(sortedData);
-    } catch (error) {
-      console.error("Error fetching books:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const { bookData, setBookData } = useContext(BooksContext);
 
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this book?")) return;
@@ -53,8 +32,9 @@ export default function Books() {
           Authorization: `Bearer ${token}`,
         },
       });
+      const filteredBook = bookData.filter(book => book.id !== id);
 
-      setBookData((prev) => prev.filter((book) => book.id !== id));
+      setBookData(filteredBook);
     } catch (error) {
       console.error("Error deleting book:", error);
     }
