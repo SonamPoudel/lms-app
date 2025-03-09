@@ -8,8 +8,11 @@ import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
 import EditBook from "./pages/books/EditBooks";
 import AddMembers from "./pages/members/AddMember";
-import Members from "./pages/members/members";
+import Members from "./pages/members/Members";
 import EditMember from "./pages/members/EditMember";
+import Transaction from "./pages/transactions/Transactions";
+import AddTransaction from "./pages/transactions/AddTransactions";
+import EditTransaction from "./pages/transactions/EditTransactions";
 
 // default export
 export default function App() {
@@ -40,6 +43,9 @@ function AppRoutes() {
         <Route path="members" element={<Members />} />
         <Route path="members/add" element={<AddMembers />} />
         <Route path="/members/edit/:id" element={<EditMember />} />
+        <Route path="transactions" element={<Transaction />} />
+        <Route path="transactions/add" element={<AddTransaction />} />
+        <Route path="/transactions/edit/:id" element={<EditTransaction/>} />
       </Route>
     </Routes>
   );

@@ -43,6 +43,17 @@ export default function Sidebar() {
             Members
           </NavLink>
         </li>
+        <li>
+          <NavLink
+            to="transactions"
+            className={({ isActive }) => `
+          hover:bg-amber-100 p-4 flex w-full justify-start items-center
+            ${isActive ? " bg-gray-300" : ""}
+          `}
+          >
+            Transactions
+          </NavLink>
+        </li>
       </ul>
       <button
         type="button"
