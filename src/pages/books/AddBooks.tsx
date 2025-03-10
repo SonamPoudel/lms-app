@@ -2,6 +2,8 @@ import React, { useContext } from "react";
 import CustomInput from "../../components/CustomInput";
 import { useNavigate } from "react-router";
 import { BooksContext } from "../../context/BooksContext";
+import axios from "axios";
+import { api } from "../../utils/api";
 // import axios from "axios";
 
 export default function AddBooks() {
@@ -23,23 +25,15 @@ export default function AddBooks() {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/books", {
+      const response = await api({
+        url: "/books",
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(bookDataReq),
+        data: bookDataReq,
       });
 
-      const responseJson = await response.json();
-
-      if (response.status === 201) {
-        // @ts-ignore
-        setBookData((prev) => [...prev, responseJson])
-        alert("Book added successfully!");
-        navigate("/books");
-      }
+      setBookData((prev) => [...prev, response.data]);
+      alert("Book added successfully!");
+      navigate("/books");
     } catch (error) {
       console.error("Error adding book:", error);
       alert("Failed to add book.");

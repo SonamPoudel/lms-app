@@ -2,6 +2,7 @@ import { PencilIcon, Trash2Icon } from "lucide-react";
 import { useContext } from "react";
 import { useNavigate } from "react-router";
 import { BooksContext } from "../../context/BooksContext";
+import { api } from "../../utils/api";
 
 const token = localStorage.getItem("token");
 
@@ -25,14 +26,11 @@ export default function Books() {
     if (!confirm("Are you sure you want to delete this book?")) return;
 
     try {
-      await fetch(`http://localhost:3000/books/${id}`, {
+      await api({
+        url: `/books/${id}`,
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
       });
-      const filteredBook = bookData.filter(book => book.id !== id);
+      const filteredBook = bookData.filter((book) => book.id !== id);
 
       setBookData(filteredBook);
     } catch (error) {
